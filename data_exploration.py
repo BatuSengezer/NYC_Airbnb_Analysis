@@ -7,7 +7,7 @@ prices = pd.read_csv(price_file)
 xls = pd.ExcelFile("raw_data/airbnb_room_type.xlsx")
 rooms = pd.read_excel(xls)
 
-last_review = pd.read_csv("raw_data/airbnb_last_review.tsv", sep= '\t')
+reviews = pd.read_csv("raw_data/airbnb_last_review.tsv", sep= '\t')
 
 # # Cleaning price column
 
@@ -51,3 +51,14 @@ rooms["room_type"] = rooms["room_type"].astype('string')
 
 # storing the count of values for room_type as room_frequencies
 room_frequencies = rooms["room_type"].value_counts().to_string()
+
+# # What timeframe are we working with?
+
+# changing the dtype of the last_review to datetime
+reviews["last_review"] = pd.to_datetime(reviews["last_review"]).dt.date
+
+# finding first and last reviews
+first_reviewed = reviews["last_review"].min()
+last_reviewed = reviews["last_review"].max()
+
+# # Joining the DataFrames
