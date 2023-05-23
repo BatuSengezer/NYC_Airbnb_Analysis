@@ -62,3 +62,18 @@ first_reviewed = reviews["last_review"].min()
 last_reviewed = reviews["last_review"].max()
 
 # # Joining the DataFrames
+
+# outer merging dataframes
+rooms_and_prices = pd.merge(prices, rooms, on="listing_id")
+
+airbnb_merged = pd.merge(rooms_and_prices, reviews, on = "listing_id")
+# print(airbnb_merged.columns)
+# print(airbnb_merged[airbnb_merged.isnull().any(axis=1)])
+
+# removing missing observations
+airbnb_merged.dropna(inplace=True)
+
+# checking for duplicate values in airbnb_merged
+# print(airbnb_merged.duplicated().sum())
+
+# Analyzing listing prices by NYC borough
