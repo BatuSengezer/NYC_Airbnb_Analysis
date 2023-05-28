@@ -96,3 +96,40 @@ WHERE number_of_reviews >= 100 AND availability_365 > 200
 GROUP BY room_type;
 
 -- How many hosts have more than one listing, and what's the maximum number of listings by a single host name?
+SELECT COUNT(DISTINCT host_name) AS num_hosts,
+       MAX(calculated_host_listings_count) AS max_listings
+FROM reviews 
+WHERE calculated_host_listings_count > 1;
+
+-- Determine the top 5 hosts who have the highest price_per_month for their listings, 
+-- considering only hosts who have at least 10 listings.
+SELECT host_name, price_per_month, calculated_host_listings_count
+FROM (
+  SELECT host_name, price_per_month, calculated_host_listings_count,
+    ROW_NUMBER() OVER (PARTITION BY host_name ORDER BY price_per_month DESC) AS rn
+  FROM prices p
+  JOIN reviews r ON p.listing_id = r.listing_id
+  WHERE calculated_host_listings_count >= 10
+) AS subquery
+WHERE rn = 1
+ORDER BY price_per_month DESC
+LIMIT 5;
+
+-- Find the neighborhood(s) that have the highest variance in listing prices.
+SELECT neighbourhood, ROUND(VARIANCE(price),2) AS price_variance
+FROM prices
+GROUP BY neighbourhood
+HAVING VARIANCE(price) IS NOT NULL
+ORDER BY price_variance DESC
+LIMIT 5;
+
+-- Calculate the average price_per_month for each neighborhood, taking into account only listings 
+-- where the host has a minimum_nights value that is higher than the average minimum_nights 
+-- value across all listings.
+SELECT neighbourhood, ROUND(AVG(price_per_month)::numeric,2)
+FROM prices p
+JOIN reviews r
+ON p.listing_id = r.listing_id
+WHERE availability_365 > (SELECT AVG(availability_365) FROM reviews)
+GROUP BY neighbourhood
+ORDER BY 2 DESC;
